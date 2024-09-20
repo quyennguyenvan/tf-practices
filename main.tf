@@ -25,11 +25,11 @@ module "eks" {
   depends_on                 = [module.vpc]
   source                     = "./_modules/eks"
   eks_cluster_name           = "qnveks"
-  eks_cluser_enginee_version = "1.30"
+  eks_cluser_enginee_version = "1.27"
   vpc_id                     = module.vpc.vpc_id
   private_subnet_ids         = module.vpc.private_subnet_id
   instance_types             = ["t2.large", "t3.large", "t2.medium", "t3.medium"]
-  ami_id                     = "ami-079c7318049545065"
+  ami_id                     = "ami-00377815af0bcd62d"
   tags                       = var.tags
 }
 

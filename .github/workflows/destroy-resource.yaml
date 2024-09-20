@@ -1,4 +1,4 @@
-name: "Terraform deployment"
+name: "Terraform destroy resources"
 on: 
   push:
     branches:
