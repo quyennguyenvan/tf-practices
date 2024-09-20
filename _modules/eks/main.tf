@@ -1,5 +1,6 @@
 locals {
-  region = data.aws_region.current.name
+  region     = data.aws_region.current.name
+  account_id = data.aws_caller_identity.current.account_id
 }
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
@@ -49,34 +50,29 @@ module "eks" {
   ]
   tags = var.tags
 }
+module "eks" {
+  source  = "terraform-aws-modules/eks/aws//modules/aws-auth"
+  version = "~> 20.24.1"
 
-resource "kubernetes_config_map" "aws_auth_configmap" {
+  manage_aws_auth_configmap = true
 
-  metadata {
-    name      = "aws-auth"
-    namespace = "kube-system"
-  }
+  aws_auth_roles = [
+    {
+      rolearn  = "${module.eks.cluster_iam_role_arn}"
+      username = "system:node:{{EC2PrivateDNSName}}"
+      groups   = ["system:bootstrappers", "system:nodes"]
+    },
+  ]
 
-  data = {
-    mapRoles = <<YAML
-- "rolearn": "${module.eks.cluster_iam_role_arn}"
-  "username": "system:node:{{EC2PrivateDNSName}}"
-  "groups":
-    - "system:bootstrappers"
-    - "system:nodes"
-YAML
-    mapUsers = <<YAML
-- "userarn": "arn:aws:iam::084375555299:user/quyennv_user"
-  "username": "quyennv_user"
-  "groups":
-    - "system:masters"
-YAML
-  }
+  aws_auth_users = [
+    {
+      userarn  = "arn:aws:iam::${local.account_id}:user/quyennv_user"
+      username = "quyennv_user"
+      groups   = ["system:masters"]
+    },
+  ]
 
-
-  lifecycle {
-    ignore_changes = [
-      metadata["annotations"], metadata["labels"],
-    ]
-  }
+  aws_auth_accounts = [
+    local.account_id
+  ]
 }
