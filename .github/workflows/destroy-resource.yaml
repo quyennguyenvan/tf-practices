@@ -25,12 +25,12 @@ jobs:
           terraform_version: 1.6.3
           terraform_wrapper: false
 
-      - name: "Select namespace"
-        run: "terraform workspace select dev"
-
       - name: "Init tf"
         run: |
           terraform init -backend-config=dev.conf
+          
+      - name: "Select namespace"
+        run: "terraform workspace select dev"
 
       - name: "Destroy the resources"
         run: "terraform destroy -var-file=./envs/dev.tfvars --auto-approve"
