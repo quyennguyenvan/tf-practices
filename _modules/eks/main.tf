@@ -1,77 +1,44 @@
 
 module "eks" {
-  source          = "terraform-aws-modules/eks/aws"
-  version         = "19.13.1"
-  cluster_name    = var.cluster_name
-  cluster_version = var.cluster_version
 
-  enable_irsa = true
+  source  = "terraform-aws-modules/eks/aws"
+  version = "~> 20.0"
 
-  create_iam_role = true
-  iam_role_name   = "${var.cluster_name}-ClusterRole"
+  cluster_name                   = var.cluster_name
+  cluster_version                = var.cluster_version
+  cluster_endpoint_public_access = true
 
   cluster_addons = {
-    coredns = {
-      resolve_conflicts = "OVERWRITE"
-    }
-    kube-proxy = {
-      most_recent = true
-    }
-    vpc-cni = {
-      resolve_conflicts = "OVERWRITE"
-    }
+    coredns                = {}
+    eks-pod-identity-agent = {}
+    kube-proxy             = {}
+    vpc-cni                = {}
   }
-  cluster_enabled_log_types = [
-    "api",
-    "audit",
-    "authenticator",
-    "controllerManager",
-    "scheduler",
-  ]
 
-  vpc_id                               = var.vpc_id
-  subnet_ids                           = var.private_subnet_ids
-  control_plane_subnet_ids             = var.control_plane_subnet_ids
-  cluster_endpoint_public_access       = true
-  cluster_endpoint_public_access_cidrs = var.cluster_endpoint_public_access_cidrs
+  vpc_id                   = var.vpc_id
+  subnet_ids               = var.private_subnet_ids
+  control_plane_subnet_ids = var.control_plane_subnet_ids
 
-  cluster_security_group_name = "${var.cluster_name}-eks-cluster-sg"
-
+  # EKS Managed Node Group(s)
   eks_managed_node_group_defaults = {
-    create_iam_role = true
-    ami_type        = "AL2_x86_64"
-    disk_size       = 100
-    instance_types  = var.eks_managed_node_group_defaults_instance_types
+    instance_types = [var.instance_types]
   }
 
   eks_managed_node_groups = {
-    blue = {}
-    green = {
-      min_size     = 1
+    this = {
+      # Starting on 1.30, AL2023 is the default AMI type for EKS managed node groups
+      ami_type       = "AL2023_x86_64_STANDARD"
+      instance_types = [var.instance_types]
+
+      min_size     = var.min_size
       max_size     = var.max_size
-      desired_size = 1
-
-      instance_types = var.instance_types
-      capacity_type  = "ON_DEMAND"
-
-      taints = {
-        dedicated = {
-          key    = "dedicated"
-          value  = "gpuGroup"
-          effect = "NO_SCHEDULE"
-        }
-      }
-      update_config = {
-        max_unavailable_percentage = 50 # or set `max_unavailable`
-      }
+      desired_size = 3
     }
   }
-  # aws-auth configmap
-  manage_aws_auth_configmap = var.manage_aws_auth_configmap
-  aws_auth_users            = var.aws_auth_users
-  aws_auth_accounts         = var.aws_auth_accounts
 
+  # Cluster access entry
+  # To add the current caller identity as an administrator
+  enable_cluster_creator_admin_permissions = true
 
   tags = var.default_tags
-
 }

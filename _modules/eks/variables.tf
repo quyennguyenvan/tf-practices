@@ -2,11 +2,9 @@
 variable "cluster_name" {
 
 }
-
 variable "cluster_version" {
 
 }
-
 
 variable "vpc_id" {
 
@@ -14,8 +12,9 @@ variable "vpc_id" {
 variable "private_subnet_ids" {
 
 }
+variable "min_size" {
 
-
+}
 variable "max_size" {
 
 }
@@ -31,12 +30,6 @@ variable "env_prefix" {
 
 }
 variable "eks_managed_node_group_defaults_instance_types" {
-
-}
-variable "aws_auth_users" {
-
-}
-variable "aws_auth_accounts" {
 
 }
 variable "manage_aws_auth_configmap" {
