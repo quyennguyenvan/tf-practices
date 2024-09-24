@@ -4,6 +4,11 @@ locals {
   azs        = length(data.aws_availability_zones.available.names)
   account_id = data.aws_caller_identity.current.account_id
 }
+resource "random_integer" "this" {
+  min = 1
+  max = 2
+}
+
 module "vpc" {
   source                                 = "./_modules/network"
   vpc_cidr                               = var.cidrvpc
@@ -62,7 +67,7 @@ module "ec2" {
   user_data_base64            = each.value.user_data_base64
   bastion_ami                 = each.value.bastion_ami
   associate_public_ip_address = each.value.associate_public_ip_address
-  public_subnet_id            = module.vpc.public_subnet_id[random_integer.subnet.result]
+  public_subnet_id            = module.vpc.vpc_public_subnet_ids[random_integer.this.result]
   bastion_monitoring          = each.value.bastion_monitoring
   default_tags = merge(
     var.default_tags,
