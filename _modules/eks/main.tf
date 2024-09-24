@@ -12,7 +12,12 @@ module "eks" {
   vpc_id                          = var.vpc_id
   subnet_ids                      = var.private_subnet_ids
 
-
+  cluster_addons = {
+    coredns                = {}
+    eks-pod-identity-agent = {}
+    kube-proxy             = {}
+    vpc-cni                = {}
+  }
   ## https://docs.aws.amazon.com/eks/latest/userguide/enable-iam-roles-for-service-accounts.html
   # enable_irsa = true
 
@@ -21,7 +26,7 @@ module "eks" {
     for private_subnet in var.private_subnet_ids : {
       launch_template_name = var.eks_cluster_name
 
-      worker_group = {
+      worker_groups = {
         name          = "${var.eks_cluster_name}-eks-worker-ondemand-${private_subnet}"
         instance_type = var.instance_types
         subnets       = tolist([private_subnet])
@@ -33,6 +38,7 @@ module "eks" {
         desired_size        = var.desired_size
         kubelete_extra_args = "-kubelet-extra-args '--node-labels=kubernetes.io/lifecycle=normal'"
         public_ip           = false
+        kubelete_extra_args = "--node-labels=kubernetes.io/lifecycle=normal"
 
         # root_volume_type = "gp2"
         block_device_mappings = {
@@ -46,41 +52,39 @@ module "eks" {
             }
           }
         }
+
+        tags = [
+          {
+            "key"                 = "k8s.io/cluster-autoscaler/${var.eks_cluster_name}-eks-cluster"
+            "value"               = "owned"
+            "propagate_at_launch" = true
+          },
+          {
+            "key"                 = "k8s.io/cluster-autoscaler/enabled"
+            "value"               = "true"
+            "propagate_at_launch" = true
+          }
+        ]
       }
     }
   ]
+  enable_cluster_creator_admin_permissions = true
+  access_entries = {
+    # One access entry with a policy associated
+    this = {
+      kubernetes_groups = []
+      principal_arn     = "arn:aws:iam::084375555299:user/quyennv_user"
 
-
+      policy_associations = {
+        this = {
+          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+          access_scope = {
+            # namespaces = ["default"]
+            type = "cluster"
+          }
+        }
+      }
+    }
+  }
   tags = var.tags
 }
-
-# resource "kubernetes_config_map" "aws_auth_configmap" {
-
-#   metadata {
-#     name      = "aws-auth"
-#     namespace = "kube-system"
-#   }
-
-#   data = {
-#     mapRoles = <<YAML
-# - "rolearn": "${module.eks.cluster_iam_role_arn}"
-#   "username": "system:node:{{EC2PrivateDNSName}}"
-#   "groups":
-#     - "system:bootstrappers"
-#     - "system:nodes"
-# YAML
-#     mapUsers = <<YAML
-# - "userarn": "arn:aws:iam::${local.account_id}:user/quyennv_user"
-#   "username": "quyennv_user"
-#   "groups":
-#     - "system:masters"
-# YAML
-#   }
-
-
-#   lifecycle {
-#     ignore_changes = [
-#       metadata["annotations"], metadata["labels"],
-#     ]
-#   }
-# }
