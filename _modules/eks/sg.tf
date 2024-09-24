@@ -3,9 +3,9 @@
 
 module "cluster-sg" {
   source  = "terraform-aws-modules/security-group/aws"
-  version = "3.0.1"
+  version = "5.2.0"
 
-  name        = "cluster-sg"
+  name        = "${var.cluster_name}-cluster-sg"
   description = "EKS node security groups"
   vpc_id      = data.aws_vpc.eks.id
 
@@ -23,8 +23,9 @@ module "cluster-sg" {
 
   number_of_computed_ingress_with_source_security_group_id = 1
 
-  egress_cidr_blocks = ["0.0.0.0/0"]
-  egress_rules       = ["all-all"]
+  egress_cidr_blocks       = ["0.0.0.0/0"]
+  egress_rules             = ["all-all"]
+  ingress_ipv6_cidr_blocks = ["2001:db8::/64"]
 
   tags = {
     Name = "${var.cluster_name}-eks-cluster-sg"
@@ -32,9 +33,9 @@ module "cluster-sg" {
 }
 module "node-sg" {
   source  = "terraform-aws-modules/security-group/aws"
-  version = "3.0.1"
+  version = "5.2.0"
 
-  name        = "node-sg"
+  name        = "${var.cluster_name}-cluster-node-sg"
   description = "EKS node security groups"
   vpc_id      = data.aws_vpc.eks.id
 
@@ -49,16 +50,16 @@ module "node-sg" {
       from_port                = 1025
       to_port                  = 65535
       protocol                 = "tcp"
-      description              = "Allow EKS Control Plane"
+      description              = "Allow EKS ${var.cluster_name} Control Plane"
       source_security_group_id = module.cluster-sg.this_security_group_id
     },
   ]
 
   number_of_computed_ingress_with_source_security_group_id = 1
 
-  egress_cidr_blocks = ["0.0.0.0/0"]
-  egress_rules       = ["all-all"]
-
+  egress_cidr_blocks       = ["0.0.0.0/0"]
+  egress_rules             = ["all-all"]
+  ingress_ipv6_cidr_blocks = ["2001:db8::/64"]
   tags = {
     Name                                        = "${var.cluster_name}-eks-node-sg"
     "kubernetes.io/cluster/${var.cluster_name}" = "owned"
