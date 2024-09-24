@@ -7,8 +7,7 @@ variable "cidrvpc" {
 
 variable "tags" {
   default = {
-    Name  = "zzzxxxxzzz"
-    Owner = "quyennvzzzz"
+    Owner = "quyennv"
   }
 }
 
@@ -27,5 +26,5 @@ variable "bastion_definition" {
 }
 
 variable "cluster_endpoint_public_access" {
-  
+
 }

@@ -21,6 +21,10 @@ module "eks" {
   ## https://docs.aws.amazon.com/eks/latest/userguide/enable-iam-roles-for-service-accounts.html
   # enable_irsa = true
 
+  self_managed_node_group_defaults = {
+    ami_id = var.ami_id
+  }
+
   self_managed_node_groups = [
 
     for private_subnet in var.private_subnet_ids : {
@@ -38,7 +42,7 @@ module "eks" {
         desired_size        = var.desired_size
         kubelete_extra_args = "-kubelet-extra-args '--node-labels=kubernetes.io/lifecycle=normal'"
         public_ip           = false
-        kubelete_extra_args = "--node-labels=kubernetes.io/lifecycle=normal"
+        kubelete_extra_args = "-kubelet-extra-args '--node-labels=kubernetes.io/lifecycle=normal'"
 
         # root_volume_type = "gp2"
         block_device_mappings = {
