@@ -1,9 +1,14 @@
-output "cluster_id" {
+
+output "aws_eks_cluster" {
   value = module.eks.cluster_id
 }
-output "cluster_name" {
-  value = module.eks.cluster_name
+output "aws_eks_cluster_auth" {
+  value = module.eks.cluster_id
 }
-output "cluster_oidc_issuer_url" {
-  value = module.eks.cluster_oidc_issuer_url
+output "cluster_endpoint" {
+  value = module.eks.cluster_endpoint
 }
+output "certificate_authority" {
+  value = module.eks.cluster_certificate_authority_data.0.data
+}
+

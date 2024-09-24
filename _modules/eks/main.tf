@@ -1,94 +1,77 @@
-locals {
-  region     = data.aws_region.current.name
-  account_id = data.aws_caller_identity.current.account_id
-}
+
 module "eks" {
-  source  = "terraform-aws-modules/eks/aws"
-  version = "20.24.1"
-  # manage_aws_auth = false
-  cluster_endpoint_public_access = var.cluster_endpoint_public_access
-  cluster_name                   = var.eks_cluster_name
-  cluster_version                = var.eks_cluser_enginee_version
-  vpc_id                         = var.vpc_id
-  subnet_ids                     = var.private_subnet_ids
+  source          = "terraform-aws-modules/eks/aws"
+  version         = "19.13.1"
+  cluster_name    = var.cluster_name
+  cluster_version = var.cluster_version
+
+  enable_irsa = true
+
+  create_iam_role = true
+  iam_role_name   = "${var.cluster_name}-ClusterRole"
 
   cluster_addons = {
-    coredns                = {}
-    eks-pod-identity-agent = {}
-    kube-proxy             = {}
-    vpc-cni                = {}
-  }
-  ## https://docs.aws.amazon.com/eks/latest/userguide/enable-iam-roles-for-service-accounts.html
-  # enable_irsa = true
-
-  self_managed_node_group_defaults = {
-    ami_id = var.ami_id
-  }
-
-  self_managed_node_groups = [
-
-    for private_subnet in var.private_subnet_ids : {
-      launch_template_name = var.eks_cluster_name
-
-      worker_groups = {
-        name          = "${var.eks_cluster_name}-eks-worker-ondemand-${private_subnet}"
-        instance_type = var.instance_types
-        subnets       = tolist([private_subnet])
-
-        ami_id = var.ami_id
-
-        max_size            = var.min_size
-        min_size            = var.max_size
-        desired_size        = var.desired_size
-        kubelete_extra_args = "-kubelet-extra-args '--node-labels=kubernetes.io/lifecycle=normal'"
-        public_ip           = false
-        kubelete_extra_args = "-kubelet-extra-args '--node-labels=kubernetes.io/lifecycle=normal'"
-
-        # root_volume_type = "gp2"
-        block_device_mappings = {
-          xvda = {
-            device_name = "/dev/xvda"
-            ebs = {
-              delete_on_termination = true
-              encrypted             = true
-              volume_size           = 100
-              volume_type           = "gp2"
-            }
-          }
-        }
-
-        tags = [
-          {
-            "key"                 = "k8s.io/cluster-autoscaler/${var.eks_cluster_name}-eks-cluster"
-            "value"               = "owned"
-            "propagate_at_launch" = true
-          },
-          {
-            "key"                 = "k8s.io/cluster-autoscaler/enabled"
-            "value"               = "true"
-            "propagate_at_launch" = true
-          }
-        ]
-      }
+    coredns = {
+      resolve_conflicts = "OVERWRITE"
     }
+    kube-proxy = {
+      most_recent = true
+    }
+    vpc-cni = {
+      resolve_conflicts = "OVERWRITE"
+    }
+  }
+  cluster_enabled_log_types = [
+    "api",
+    "audit",
+    "authenticator",
+    "controllerManager",
+    "scheduler",
   ]
-  enable_cluster_creator_admin_permissions = true
-  access_entries = {
-    # One access entry with a policy associated
-    this = {
-      kubernetes_groups = []
-      principal_arn     = "arn:aws:iam::084375555299:user/quyennv_user"
 
-      policy_associations = {
-        this = {
-          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
-          access_scope = {
-            # namespaces = ["default"]
-            type = "cluster"
-          }
+  vpc_id                               = var.vpc_id
+  subnet_ids                           = var.private_subnet_ids
+  control_plane_subnet_ids             = var.control_plane_subnet_ids
+  cluster_endpoint_public_access       = true
+  cluster_endpoint_public_access_cidrs = var.cluster_endpoint_public_access_cidrs
+
+  cluster_security_group_name = "${var.cluster_name}-eks-cluster-sg"
+
+  eks_managed_node_group_defaults = {
+    create_iam_role = true
+    ami_type        = "AL2_x86_64"
+    disk_size       = 100
+    instance_types  = var.eks_managed_node_group_defaults_instance_types
+  }
+
+  eks_managed_node_groups = {
+    blue = {}
+    green = {
+      min_size     = 1
+      max_size     = var.max_size
+      desired_size = 1
+
+      instance_types = var.instance_types
+      capacity_type  = "ON_DEMAND"
+
+      taints = {
+        dedicated = {
+          key    = "dedicated"
+          value  = "gpuGroup"
+          effect = "NO_SCHEDULE"
         }
+      }
+      update_config = {
+        max_unavailable_percentage = 50 # or set `max_unavailable`
       }
     }
   }
-  tags = var.tags
+  # aws-auth configmap
+  manage_aws_auth_configmap = var.manage_aws_auth_configmap
+  aws_auth_users            = var.aws_auth_users
+  aws_auth_accounts         = var.aws_auth_accounts
+
+
+  tags = var.default_tags
+
 }

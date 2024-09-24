@@ -1,102 +1,39 @@
-
 locals {
-  azs = var.azs
+  azs = slice(data.aws_availability_zones.available.names, 0, 3)
 }
 
-resource "aws_vpc" "main" {
-  cidr_block = var.cidrvpc
+module "vpc" {
+  source  = "terraform-aws-modules/vpc/aws"
+  version = "~> 3.0"
 
-  tags = var.tags
-}
+  name = var.vpc_name
+  cidr = var.vpc_cidr
 
-#create the public subnet
-resource "aws_subnet" "public" {
+  azs             = local.azs
+  private_subnets = [for k, v in local.azs : cidrsubnet(var.vpc_cidr, 4, k)]
+  public_subnets  = [for k, v in local.azs : cidrsubnet(var.vpc_cidr, 8, k + 48)]
+  intra_subnets   = [for k, v in local.azs : cidrsubnet(var.vpc_cidr, 8, k + 52)]
 
-  count             = local.azs
-  cidr_block        = cidrsubnet(aws_vpc.main.cidr_block, 8, count.index)
-  availability_zone = var.azname[count.index]
-  vpc_id            = aws_vpc.main.id
-  tags = merge({
-    Name = "${var.vpc_name}-public-subnet"
-    },
-  var.tags)
-}
+  enable_nat_gateway     = var.enable_nat_gateway
+  single_nat_gateway     = var.single_nat_gateway
+  one_nat_gateway_per_az = var.single_nat_gateway ? false : true
+  enable_dns_hostnames   = var.enable_dns_hostnames
 
-#create internet gateway
-resource "aws_internet_gateway" "main-igw" {
-  vpc_id = aws_vpc.main.id
-  tags = merge({
-    Name = "${var.vpc_name}-igw"
-    },
-  var.tags)
-}
+  create_database_subnet_group           = var.create_database_subnet_group
+  create_database_subnet_route_table     = var.create_database_subnet_route_table
+  create_database_internet_gateway_route = var.create_database_internet_gateway_route
 
-resource "aws_route" "main-route" {
-  route_table_id         = aws_vpc.main.main_route_table_id
-  destination_cidr_block = "0.0.0.0/0"
-  gateway_id             = aws_internet_gateway.main-igw.id
-}
+  enable_flow_log                      = var.enable_flow_log
+  create_flow_log_cloudwatch_iam_role  = var.create_flow_log_cloudwatch_iam_role
+  create_flow_log_cloudwatch_log_group = var.create_flow_log_cloudwatch_log_group
 
-#assosicate the public subnet to main route table with igw
-resource "aws_route_table_association" "public-subnet-rtb" {
-  count          = local.azs
-  subnet_id      = element(aws_subnet.public.*.id, count.index)
-  route_table_id = aws_vpc.main.main_route_table_id
-}
-
-#create the private subnet
-resource "aws_subnet" "private" {
-  count             = local.azs
-  cidr_block        = cidrsubnet(aws_vpc.main.cidr_block, 8, count.index + local.azs)
-  availability_zone = var.azname[count.index]
-  vpc_id            = aws_vpc.main.id
-  tags = merge({
-    Name = "${var.vpc_name}-private-subnet"
-    },
-  var.tags)
-}
-
-#create the natgate way
-resource "aws_eip" "ngweip" {
-  count = local.azs
-  tags = merge(
-    {
-      ext-name = "${var.vpc_name}-ngw-eip-${count.index}"
-    },
-    var.tags
-  )
-}
-resource "aws_nat_gateway" "ngw" {
-  count         = local.azs
-  subnet_id     = element(aws_subnet.private.*.id, count.index)
-  allocation_id = element(aws_eip.ngweip.*.id, count.index)
-  tags = merge(
-    { ext-name = "${var.vpc_name}-ngw-eip-${count.index}" }
-    ,
-    var.tags
-  )
-}
-#create the route table for private subnet
-resource "aws_route_table" "private_rtb" {
-  count  = local.azs
-  vpc_id = aws_vpc.main.id
-
-  #define routete for the private subnet
-  route {
-    cidr_block     = "0.0.0.0/0"
-    nat_gateway_id = element(aws_nat_gateway.ngw.*.id, count.index)
+  public_subnet_tags = {
+    "kubernetes.io/role/elb" = 1
   }
-  tags = merge(
-    {
-      ext-name = "${var.vpc_name}-private-rtb-${count.index}"
-    },
-    var.tags
-  )
-}
 
-#asosicate the private subnets to private route tables
-resource "aws_route_table_association" "private-subnet-rtb" {
-  count          = local.azs
-  subnet_id      = element(aws_subnet.private.*.id, count.index)
-  route_table_id = element(aws_route_table.private_rtb.*.id, count.index)
+  private_subnet_tags = {
+    "kubernetes.io/role/internal-elb" = 1
+  }
+
+  tags = var.default_tags
 }

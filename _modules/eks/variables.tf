@@ -1,36 +1,50 @@
-variable "eks_cluster_name" {
+
+variable "cluster_name" {
 
 }
-variable "eks_cluser_enginee_version" {
+
+variable "cluster_version" {
 
 }
+
+
 variable "vpc_id" {
 
 }
 variable "private_subnet_ids" {
 
 }
+
+
+variable "max_size" {
+
+}
+
 variable "instance_types" {
 
 }
 
-variable "ami_id" {
+variable "default_tags" {
 
 }
+variable "env_prefix" {
 
-variable "tags" {
+}
+variable "eks_managed_node_group_defaults_instance_types" {
 
 }
+variable "aws_auth_users" {
 
-variable "min_size" {
-  default = 3
 }
-variable "max_size" {
-  default = 9
+variable "aws_auth_accounts" {
+
 }
-variable "desired_size" {
-  default = 3
+variable "manage_aws_auth_configmap" {
+
 }
-variable "cluster_endpoint_public_access" {
+variable "cluster_endpoint_public_access_cidrs" {
+
+}
+variable "control_plane_subnet_ids" {
 
 }

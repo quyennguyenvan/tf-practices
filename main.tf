@@ -1,47 +1,51 @@
-locals {
-  azs = length(data.aws_availability_zones.available.names)
-}
-resource "random_integer" "subnet" {
-  min = 0
-  max = 2
-}
 
-#CALLING MODULE NETWORK TO CREATE THE VPC
+
+locals {
+  azs        = length(data.aws_availability_zones.available.names)
+  account_id = data.aws_caller_identity.current.account_id
+}
 module "vpc" {
-  source   = "./_modules/network"
-  azs      = local.azs
-  cidrvpc  = var.cidrvpc
-  azname   = data.aws_availability_zones.available.names
-  vpc_name = var.vpc_name
-  tags = merge(var.tags,
-    {
-      "ext-env" : terraform.workspace
-    }
+  source                                 = "./network"
+  vpc_cidr                               = var.cidrvpc
+  vpc_name                               = var.vpc_name
+  enable_nat_gateway                     = var.enable_nat_gateway
+  single_nat_gateway                     = var.single_nat_gateway
+  enable_dns_hostnames                   = var.enable_dns_hostnames
+  create_database_subnet_group           = var.create_database_subnet_group
+  create_database_subnet_route_table     = var.create_database_subnet_route_table
+  create_database_internet_gateway_route = var.create_database_internet_gateway_route
+  enable_flow_log                        = var.enable_flow_log
+  create_flow_log_cloudwatch_iam_role    = var.create_flow_log_cloudwatch_iam_role
+  create_flow_log_cloudwatch_log_group   = var.create_flow_log_cloudwatch_log_group
+  default_tags = merge(
+    var.extend_tag,
+    var.default_tag
   )
 }
 
 #CREATE THE EKS CLUSTER
 module "eks" {
-  depends_on                     = [module.vpc]
-  source                         = "./_modules/eks"
-  eks_cluster_name               = "qnveks"
-  cluster_endpoint_public_access = var.cluster_endpoint_public_access
-  eks_cluser_enginee_version     = "1.30"
-  vpc_id                         = module.vpc.vpc_id
-  private_subnet_ids             = module.vpc.private_subnet_id
-  instance_types                 = ["t2.large", "t3.large", "t2.medium", "t3.medium"]
-  ami_id                         = "ami-00377815af0bcd62d"
-  tags                           = var.tags
+  depends_on = [
+    module.vpc
+  ]
+  source = "./eks"
+
+  vpc_id                                         = module.vpc.vpc_id
+  private_subnet_ids                             = module.vpc.vpc_private_subnet_ids
+  control_plane_subnet_ids                       = module.vpc.intra_subnet_id
+  env_prefix                                     = var.env_prefix
+  cluster_name                                   = var.eks_config.cluster_name
+  cluster_version                                = var.eks_config.cluster_version
+  max_size                                       = var.eks_config.max_size
+  eks_managed_node_group_defaults_instance_types = var.eks_config.eks_managed_node_group_defaults_instance_types
+  manage_aws_auth_configmap                      = var.eks_config.manage_aws_auth_configmap
+  instance_types                                 = var.eks_config.instance_types
+  aws_auth_users                                 = var.eks_config.aws_auth_users
+  aws_auth_accounts                              = local.account_id
+  cluster_endpoint_public_access_cidrs           = var.eks_config.cluster_endpoint_public_access_cidrs
+  default_tags                                   = var.default_tag
 }
 
-#SETUP AUTOSCALLER for EKS
-# module "k8sscaler" {
-#   depends_on              = [module.vpc, module.eks]
-#   source                  = "./_modules/autoscaler"
-#   cluster_id              = module.eks.cluster_id
-#   eks_cluster_name        = module.eks.cluster_name
-#   cluster_oidc_issuer_url = module.eks.cluster_oidc_issuer_url
-# }
 
 #CALLING MODULE EC2 TO CREATE THE EC2 INSTANCE 
 
