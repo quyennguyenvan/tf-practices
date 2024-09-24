@@ -5,7 +5,7 @@ locals {
   account_id = data.aws_caller_identity.current.account_id
 }
 module "vpc" {
-  source                                 = "./modules/network"
+  source                                 = "./_modules/network"
   vpc_cidr                               = var.cidrvpc
   vpc_name                               = var.vpc_name
   enable_nat_gateway                     = var.enable_nat_gateway
@@ -18,8 +18,7 @@ module "vpc" {
   create_flow_log_cloudwatch_iam_role    = var.create_flow_log_cloudwatch_iam_role
   create_flow_log_cloudwatch_log_group   = var.create_flow_log_cloudwatch_log_group
   default_tags = merge(
-    var.extend_tag,
-    var.default_tag
+    var.default_tags
   )
 }
 
@@ -28,7 +27,7 @@ module "eks" {
   depends_on = [
     module.vpc
   ]
-  source = "./modules/eks"
+  source = "./_modules/eks"
 
   vpc_id                                         = module.vpc.vpc_id
   private_subnet_ids                             = module.vpc.vpc_private_subnet_ids
@@ -43,7 +42,7 @@ module "eks" {
   aws_auth_users                                 = var.eks_config.aws_auth_users
   aws_auth_accounts                              = local.account_id
   cluster_endpoint_public_access_cidrs           = var.eks_config.cluster_endpoint_public_access_cidrs
-  default_tags                                   = var.default_tag
+  default_tags                                   = var.default_tags
 }
 
 
