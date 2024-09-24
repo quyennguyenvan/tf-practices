@@ -7,7 +7,7 @@ module "cluster-sg" {
 
   name        = "${var.cluster_name}-cluster-sg"
   description = "EKS node security groups"
-  vpc_id      = data.aws_vpc.eks.id
+  vpc_id      = var.vpc_id
 
   ingress_cidr_blocks = ["0.0.0.0/0"]
 
@@ -17,7 +17,7 @@ module "cluster-sg" {
       to_port                  = 443
       protocol                 = "tcp"
       description              = "Allow pods to communicate with the cluster API Server"
-      source_security_group_id = module.node-sg.this_security_group_id
+      source_security_group_id = module.node-sg.security_group_id
     },
   ]
 
@@ -37,7 +37,7 @@ module "node-sg" {
 
   name        = "${var.cluster_name}-cluster-node-sg"
   description = "EKS node security groups"
-  vpc_id      = data.aws_vpc.eks.id
+  vpc_id      = var.vpc_id
 
   ingress_cidr_blocks = [data.aws_vpc.eks.cidr_block]
   ingress_with_self = [
@@ -51,7 +51,7 @@ module "node-sg" {
       to_port                  = 65535
       protocol                 = "tcp"
       description              = "Allow EKS ${var.cluster_name} Control Plane"
-      source_security_group_id = module.cluster-sg.this_security_group_id
+      source_security_group_id = module.cluster-sg.security_group_id
     },
   ]
 
