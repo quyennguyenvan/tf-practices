@@ -15,7 +15,3 @@ data "aws_security_group" "node" {
   name   = module.node-sg.this_security_group_name
 }
 
-data "aws_security_group" "bastion" {
-  vpc_id = data.aws_vpc.eks.id
-  name   = module.ssh_sg.this_security_group_name
-}
