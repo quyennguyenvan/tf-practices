@@ -26,6 +26,6 @@ variable "bastion_definition" {
   default     = {}
 }
 
-variable "private_api_endpoint" {
-
+variable "cluster_endpoint_public_access" {
+  
 }

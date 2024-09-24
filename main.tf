@@ -22,16 +22,16 @@ module "vpc" {
 
 #CREATE THE EKS CLUSTER
 module "eks" {
-  depends_on                 = [module.vpc]
-  source                     = "./_modules/eks"
-  eks_cluster_name           = "qnveks"
-  private_api_endpoint       = var.private_api_endpoint
-  eks_cluser_enginee_version = "1.30"
-  vpc_id                     = module.vpc.vpc_id
-  private_subnet_ids         = module.vpc.private_subnet_id
-  instance_types             = ["t2.large", "t3.large", "t2.medium", "t3.medium"]
-  ami_id                     = "ami-00377815af0bcd62d"
-  tags                       = var.tags
+  depends_on                     = [module.vpc]
+  source                         = "./_modules/eks"
+  eks_cluster_name               = "qnveks"
+  cluster_endpoint_public_access = var.cluster_endpoint_public_access
+  eks_cluser_enginee_version     = "1.30"
+  vpc_id                         = module.vpc.vpc_id
+  private_subnet_ids             = module.vpc.private_subnet_id
+  instance_types                 = ["t2.large", "t3.large", "t2.medium", "t3.medium"]
+  ami_id                         = "ami-00377815af0bcd62d"
+  tags                           = var.tags
 }
 
 #SETUP AUTOSCALLER for EKS

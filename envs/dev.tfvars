@@ -28,4 +28,4 @@ bastion_definition = {
     }
   }
 }
-private_api_endpoint = false
+cluster_endpoint_public_access = true

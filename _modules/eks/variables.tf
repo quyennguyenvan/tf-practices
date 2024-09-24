@@ -31,6 +31,6 @@ variable "max_size" {
 variable "desired_size" {
   default = 3
 }
-variable "private_api_endpoint" {
+variable "cluster_endpoint_public_access" {
 
 }
