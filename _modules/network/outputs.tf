@@ -10,7 +10,7 @@ output "vpc_public_subnet_ids" {
 output "vpc_db_subnet_group_id" {
   value = module.vpc.database_subnet_group
 }
-output "intra_subnet_id" {
+output "intra_subnet_ids" {
   value = module.vpc.intra_subnets
 }
 output "vpc_cidr" {

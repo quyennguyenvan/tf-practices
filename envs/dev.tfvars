@@ -20,6 +20,7 @@ eks_config = {
   instance_type                                  = "t2.medium"
   instance_types                                 = ["t2.large", "t2.medium", "t2.xlarge"]
   manage_aws_auth_configmap                      = true
+  endpoint_public_access                         = true
   aws_auth_users = [
     {
       userarn  = "arn:aws:iam::629526135429:user/joe-dev"
@@ -27,7 +28,8 @@ eks_config = {
       groups   = ["system:masters"]
     },
   ]
-  cluster_endpoint_public_access_cidrs = ["0.0.0.0/0"]
+  cluster_endpoint_public_access_cidrs = ["0.0.0.0/0"],
+  eks_cw_logging                       = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
 }
 vm-config = {
   vm1 = {

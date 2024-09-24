@@ -41,3 +41,12 @@ variable "cluster_endpoint_public_access_cidrs" {
 variable "control_plane_subnet_ids" {
 
 }
+variable "eks_cw_logging" {
+
+}
+variable "endpoint_public_access" {
+
+}
+variable "intranet_subnet_ids" {
+
+}

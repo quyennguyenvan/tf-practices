@@ -1,16 +1,16 @@
 resource "aws_eks_cluster" "eks" {
-  name = var.cluster_name
-
-  version = var.cluster_version
-
+  name     = var.cluster_name
+  version  = var.cluster_version
   role_arn = aws_iam_role.cluster.arn
 
   vpc_config {
-    security_group_ids = [data.aws_security_group.cluster.id]
-    subnet_ids         = var.private_subnet_ids
+    security_group_ids     = [data.aws_security_group.cluster.id]
+    subnet_ids             = var.intranet_subnet_ids
+    endpoint_public_access = var.endpoint_public_access
+    public_access_cidrs    = var.cluster_endpoint_public_access_cidrs
   }
 
-  enabled_cluster_log_types = true
+  enabled_cluster_log_types = var.eks_cw_logging
 
   encryption_config {
     resources = ["secrets"]
