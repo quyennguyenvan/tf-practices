@@ -5,7 +5,7 @@ locals {
   account_id = data.aws_caller_identity.current.account_id
 }
 module "vpc" {
-  source                                 = "./network"
+  source                                 = "./modules/network"
   vpc_cidr                               = var.cidrvpc
   vpc_name                               = var.vpc_name
   enable_nat_gateway                     = var.enable_nat_gateway
@@ -28,7 +28,7 @@ module "eks" {
   depends_on = [
     module.vpc
   ]
-  source = "./eks"
+  source = "./modules/eks"
 
   vpc_id                                         = module.vpc.vpc_id
   private_subnet_ids                             = module.vpc.vpc_private_subnet_ids
@@ -66,7 +66,7 @@ module "ec2" {
   public_subnet_id            = module.vpc.public_subnet_id[random_integer.subnet.result]
   bastion_monitoring          = each.value.bastion_monitoring
   default_tags = merge(
-    var.tags,
+    var.default_tags,
     each.value.ext-tags,
     {
       "ext-env" : terraform.workspace
