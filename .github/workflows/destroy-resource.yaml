@@ -25,13 +25,8 @@ jobs:
           terraform_version: 1.6.3
           terraform_wrapper: false
 
-      - name: "Create namespace"
-        run: "terraform workspace new dev"
-        continue-on-error: true
-        
       - name: "Select namespace"
         run: "terraform workspace select dev"
-        continue-on-error: true
 
       - name: "Init tf"
         run: |

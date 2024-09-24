@@ -14,3 +14,6 @@ variable "create_flow_log_cloudwatch_iam_role" {}
 variable "create_flow_log_cloudwatch_log_group" {}
 
 variable "default_tags" {}
+variable "cluster_name" {
+
+}

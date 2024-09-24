@@ -22,6 +22,7 @@ module "vpc" {
   enable_flow_log                        = var.enable_flow_log
   create_flow_log_cloudwatch_iam_role    = var.create_flow_log_cloudwatch_iam_role
   create_flow_log_cloudwatch_log_group   = var.create_flow_log_cloudwatch_log_group
+  cluster_name                           = var.eks_config.cluster_name
   default_tags = merge(
     var.default_tags
   )

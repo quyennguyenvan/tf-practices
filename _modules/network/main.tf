@@ -31,12 +31,21 @@ module "vpc" {
   flow_log_max_aggregation_interval     = 60
 
   public_subnet_tags = {
-    "kubernetes.io/role/elb" = 1
+    "kubernetes.io/role/elb"                    = 1
+    "kubernetes.io/cluster/${var.cluster_name}" = "shared"
+    Name                                        = "${var.cluster_name}-eks-public"
+
   }
 
   private_subnet_tags = {
+    Name                                        = "${var.cluster_name}-eks-private"
+    "kubernetes.io/cluster/${var.cluster_name}" = "shared"
+
     "kubernetes.io/role/internal-elb" = 1
   }
 
-  tags = var.default_tags
+  tags = merge(var.default_tags, {
+    Name                                        = "${var.cluster_name}-vpc"
+    "kubernetes.io/cluster/${var.cluster_name}" = "shared"
+  })
 }
