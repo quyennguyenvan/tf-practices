@@ -38,9 +38,6 @@ variable "manage_aws_auth_configmap" {
 variable "cluster_endpoint_public_access_cidrs" {
 
 }
-variable "control_plane_subnet_ids" {
-
-}
 variable "eks_cw_logging" {
 
 }

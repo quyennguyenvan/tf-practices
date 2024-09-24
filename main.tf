@@ -37,7 +37,6 @@ module "eks" {
   vpc_id                                         = module.vpc.vpc_id
   private_subnet_ids                             = module.vpc.vpc_private_subnet_ids
   intranet_subnet_ids                            = module.vpc.intra_subnet_ids
-  control_plane_subnet_ids                       = module.vpc.intra_subnet_id
   env_prefix                                     = var.env_prefix
   cluster_name                                   = var.eks_config.cluster_name
   cluster_version                                = var.eks_config.cluster_version
