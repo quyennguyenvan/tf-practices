@@ -6,11 +6,12 @@ module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "20.24.1"
   # manage_aws_auth = false
+  cluster_endpoint_private_access = var.private_api_endpoint
+  cluster_name                    = var.eks_cluster_name
+  cluster_version                 = var.eks_cluser_enginee_version
+  vpc_id                          = var.vpc_id
+  subnet_ids                      = var.private_subnet_ids
 
-  cluster_name    = var.eks_cluster_name
-  cluster_version = var.eks_cluser_enginee_version
-  vpc_id          = var.vpc_id
-  subnet_ids      = var.private_subnet_ids
 
   ## https://docs.aws.amazon.com/eks/latest/userguide/enable-iam-roles-for-service-accounts.html
   # enable_irsa = true

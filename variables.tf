@@ -25,3 +25,7 @@ variable "bastion_definition" {
   description = "The definition of bastion instance"
   default     = {}
 }
+
+variable "private_api_endpoint" {
+
+}

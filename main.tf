@@ -25,6 +25,7 @@ module "eks" {
   depends_on                 = [module.vpc]
   source                     = "./_modules/eks"
   eks_cluster_name           = "qnveks"
+  private_api_endpoint       = var.private_api_endpoint
   eks_cluser_enginee_version = "1.30"
   vpc_id                     = module.vpc.vpc_id
   private_subnet_ids         = module.vpc.private_subnet_id

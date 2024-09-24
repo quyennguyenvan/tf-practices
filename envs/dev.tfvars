@@ -28,3 +28,4 @@ bastion_definition = {
     }
   }
 }
+private_api_endpoint = false
