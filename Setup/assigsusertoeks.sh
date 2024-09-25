@@ -5,7 +5,7 @@
 AWS_REGION=us-west-2
 AWS_PROFILE=vti
 EKS_CLUSTER_NAME=qnveks
-AWS_USER_ARN=arn:aws:iam::084375555299:user/quyennv_user
+AWS_USER_ARN=arn:aws:iam::084375555299:user/DE000037
 TYPE_ACCESS=cluster
 POLICY_ARN=arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy
 
