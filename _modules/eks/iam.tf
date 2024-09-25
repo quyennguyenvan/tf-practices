@@ -1,7 +1,7 @@
 resource "aws_iam_role" "cluster" {
-  name = "${var.cluster_name}-eks-cluster-role"
+  name = "${var.cluster_name}-${local.identify}-eks-cluster-role"
   tags = merge(var.default_tags, {
-    "Name" = "${var.cluster_name}-${local.identify}-eks-cluster-role"
+    "Name" = "${var.cluster_name}eks-cluster-role"
   })
 
   assume_role_policy = <<POLICY

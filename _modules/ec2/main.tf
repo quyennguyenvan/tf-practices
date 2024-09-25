@@ -1,5 +1,9 @@
+resource "random_integer" "this" {
+  min = 10000000
+  max = 99999999
+}
 locals {
-  identify = format("mmhDDMMYY", timestamp())
+  identify = random_integer.this.result
 }
 
 resource "aws_key_pair" "bastion_keypair" {

@@ -1,7 +1,10 @@
+resource "random_integer" "this" {
+  min = 10000000
+  max = 99999999
+}
 locals {
   azs      = slice(data.aws_availability_zones.available.names, 0, 3)
-  identify = format("mmhDDMMYY", timestamp())
-
+  identify = random_integer.this.result
 }
 
 module "vpc" {
