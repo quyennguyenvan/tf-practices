@@ -31,4 +31,5 @@ read profile
 aws eks update-kubeconfig --name $ekscluster --region $region --profile $profile
 
 echo "Verifying the eks cluster"
+kubectl config current-context | grep $ekscluster  | wc -l
 kubectl get namespace -A

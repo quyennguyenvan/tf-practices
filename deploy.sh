@@ -1,4 +1,4 @@
-echo "please provider terraform workspace"
+echo "please provide terraform workspace"
 read tfwf
 terraform workspace new $tfwf
 terraform workspace select $tfwf
