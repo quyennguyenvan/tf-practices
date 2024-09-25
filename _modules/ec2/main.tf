@@ -1,5 +1,9 @@
+locals {
+  identify = format("mmhDDMMYY", timestamp())
+}
+
 resource "aws_key_pair" "bastion_keypair" {
-  key_name   = var.bastion_name
+  key_name   = "${var.bastion_name}-${local.identify}"
   public_key = var.bastion_public_key
   tags       = var.default_tags
 }

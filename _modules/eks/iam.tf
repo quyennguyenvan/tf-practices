@@ -1,7 +1,7 @@
 resource "aws_iam_role" "cluster" {
   name = "${var.cluster_name}-eks-cluster-role"
   tags = merge(var.default_tags, {
-    "Name" = "${var.cluster_name}-eks-cluster-role"
+    "Name" = "${var.cluster_name}-${local.identify}-eks-cluster-role"
   })
 
   assume_role_policy = <<POLICY
@@ -32,7 +32,7 @@ resource "aws_iam_role_policy_attachment" "cluster-AmazonEKSServicePolicy" {
 
 # NODES
 resource "aws_iam_role" "node" {
-  name = "${var.cluster_name}-eks-node-role"
+  name = "${var.cluster_name}-${local.identify}-eks-node-role"
   tags = merge(var.default_tags, {
     "Name" = "${var.cluster_name}-eks-node-role"
   })
@@ -68,6 +68,6 @@ resource "aws_iam_role_policy_attachment" "node-AmazonEC2ContainerRegistryReadOn
 }
 
 resource "aws_iam_instance_profile" "node" {
-  name = "${var.cluster_name}-eks-node-instance-profile"
+  name = "${var.cluster_name}-${local.identify}-eks-node-instance-profile"
   role = aws_iam_role.node.name
 }

@@ -1,10 +1,10 @@
 # add prometheus Helm repo
 
-```helm repo add prometheus-community https://prometheus-community.github.io/helm-charts```
+`helm repo add prometheus-community https://prometheus-community.github.io/helm-charts`
 
 # add grafana Helm repo
 
-```helm repo add grafana https://grafana.github.io/helm-charts```
+`helm repo add grafana https://grafana.github.io/helm-charts`
 
 ```sh {"id":"01J87W24JHB4G2J2K78S6TQ10K"}
 kubectl create namespace prometheus
@@ -24,12 +24,12 @@ kubectl get all -n prometheus
 
 kubectl create namespace grafana
 
-helm install grafana grafana/grafana   
---namespace grafana   
---set persistence.storageClassName="gp2"   
---set persistence.enabled=true   
---set adminPassword='EKS!sAWSome'   
---values ${pwd}/EKSConfig/grafana.yaml   
+helm install grafana grafana/grafana \
+--namespace grafana \
+--set persistence.storageClassName="gp2" \
+--set persistence.enabled=true \
+--set adminPassword='EKS!sAWSome' \
+--values grafana.yaml \
 --set service.type=LoadBalancer
 
 kubectl get all -n grafana
