@@ -14,5 +14,3 @@ spec:
       storage: 2Gi
   storageClassName: openebs-hostpath
   volumeMode: Filesystem
-status:
-  phase: Pending

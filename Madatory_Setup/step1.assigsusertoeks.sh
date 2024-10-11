@@ -1,6 +1,7 @@
 #/bin/bash
 
 #references document: https://docs.aws.amazon.com/eks/latest/userguide/access-policies.html
+#require aws cli version latest
 
 AWS_REGION=ap-southeast-2
 AWS_PROFILE=vti
